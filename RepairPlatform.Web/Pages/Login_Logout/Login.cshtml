@@ -1,0 +1,133 @@
+﻿@page
+@model LoginModel
+@{
+    ViewData["Title"] = "Вход";
+}
+
+<style>
+    .login-container {
+        max-width: 400px; 
+        margin: 0 auto;
+        padding: 30px; 
+        border: 1px solid #ccc; 
+        border-radius: 10px; 
+        background-color: #f9f9f9;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+    }
+
+    .form-group {
+        position: relative;
+        margin-bottom: 15px;
+    }
+
+    .toggle-password {
+        position: absolute;
+        top: 67%;
+        right: 15px;
+        transform: translateY(-50%);
+        cursor: pointer;
+    }
+
+        .toggle-password img {
+            width: 20px;
+        }
+       
+    .form-control {
+        padding-right: 20px;
+    }
+
+    .radio-group {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 15px;
+    }
+
+        .radio-group input[type="radio"] {
+            display: none;
+        }
+
+        .radio-group label {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin: 0 5px;
+            cursor: pointer;
+            background-color: #f8f9fa;
+        }
+
+        .radio-group input[type="radio"]:checked + label {
+            background-color: #007bff;
+            color: #fff;
+            border-color: #007bff;
+        }
+
+    .alert {
+        color: red;
+        margin-top: 10px;
+    }
+
+    .btn-primary {
+        background-color: rgb(255, 145, 77); 
+        border-color: rgb(255, 145, 77); 
+        color: white; 
+    }
+
+        .btn-primary:hover {
+            background-color: rgb(255, 128, 51); 
+            border-color: rgb(255, 128, 51); 
+        }
+</style>
+
+
+<div class="login-container">
+<h2>Вход</h2>
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-danger">@Model.ErrorMessage</div>
+}
+
+    <form method="post">
+        <input type="hidden" name="ReturnUrl" value="@Model.ReturnUrl" />
+        <div class="form-group radio-group">
+            <input type="radio" id="client" name="UserType" value="Client" required checked>
+            <label for="client">Клиент</label>
+            <input type="radio" id="repairguy" name="UserType" value="Repairguy" required>
+            <label for="repairguy">Майстор</label>
+            <span asp-validation-for="UserType" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label for="Email">Имейл</label>
+            <input type="email" class="form-control" id="Email" name="Email" required placeholder="Имейл" />
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label for="Password">Парола</label>
+            <input type="password" class="form-control" id="Password" name="Password" required placeholder="Парола" />
+            <span class="toggle-password" onclick="togglePassword()">
+                <img src="@Url.Content("~/eye_open.png")" id="eyeIcon" alt="Toggle Password Visibility">
+            </span>
+            <span asp-validation-for="Password" class="text-danger"></span>
+        </div>
+
+    <button type="submit" class="btn btn-primary">Вход</button>
+</form>
+<div/>
+
+        <script>
+            function togglePassword() {
+                const passwordField = document.getElementById('Password');
+                const eyeIcon = document.getElementById('eyeIcon');
+                const passwordFieldType = passwordField.getAttribute('type');
+
+                if (passwordFieldType === 'password') {
+                    passwordField.setAttribute('type', 'text');
+                    eyeIcon.setAttribute('src', '@Url.Content("~/eye_hidden.png")');
+                } else {
+                    passwordField.setAttribute('type', 'password');
+                    eyeIcon.setAttribute('src', '@Url.Content("~/eye_open.png")');
+                }
+            }
+        </script>

@@ -1,0 +1,206 @@
+﻿@page "/Register/RegisterClient"
+@model RepairPlatform.Web.Pages.Register.RegisterClientModel
+@{
+    ViewData["Title"] = "Регистрация - Клиент";
+}
+
+<style>
+    .register-container {
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 30px; 
+        border: 1px solid #ccc; 
+        border-radius: 10px; 
+        background-color: #f9f9f9;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    select {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-color: white;
+        padding-right: 40px; 
+        border: 1px solid #ced4da; 
+        border-radius: 0.25rem; 
+        height: calc(1.5em + 0.75rem + 2px); 
+        line-height: 1.5;
+    }
+
+        select::-ms-expand {
+            display: none;
+        }
+
+    .toggle-password-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .toggle-password {
+        position: absolute;
+        right: 10px;
+        cursor: pointer;
+    }
+
+        .toggle-password img {
+            width: 20px;
+        }
+
+    .valid-password {
+        color: green;
+    }
+</style>
+
+<div class="register-container">
+<h2>Регистрация като Клиент</h2>
+
+<form method="post">
+    <div class="form-group">
+        <label for="CFirstName">Име</label>
+        <input type="text" class="form-control" id="CFirstName" name="Client.CFirstName" required placeholder="Име" />
+    </div>
+    <div class="form-group">
+        <label for="CLastName">Фамилия</label>
+        <input type="text" class="form-control" id="CLastName" name="Client.CLastName" required placeholder="Фамилия" />
+    </div>
+    <div class="form-group">
+        <label for="CTelephone">Телефон</label>
+        <input type="text" class="form-control" id="CTelephone" name="Client.CTelephone" required placeholder="Телефон" />
+    </div>
+    <div class="form-group">
+        <label for="CEmail">Имейл</label>
+        <input type="email" class="form-control" id="CEmail" name="Client.CEmail" required placeholder="Имейл" />
+    </div>
+
+@*     <div class="form-group">
+        <label for="CPassword">Парола</label>
+        <input type="password" class="form-control" id="CPassword" name="Client.CPassword" required placeholder="Парола" />
+        <div class="input-group-append">
+            <div class="input-group-text">
+                <input type="checkbox" onclick="togglePasswordVisibility('CPassword')"> Покажи
+            </div>
+        </div>
+        <ul id="password-requirements" class="text-danger small"></ul>
+    </div>
+
+
+
+    <div class="form-group">
+        <label for="ConfirmPassword">Потвърди парола</label>
+        <input type="password" class="form-control" id="ConfirmPassword"
+               name="ConfirmPassword" placeholder="Потвърди парола">
+        <div class="input-group-append">
+            <div class="input-group-text">
+                <input type="checkbox" onclick="togglePasswordVisibility('ConfirmPassword')"> Покажи
+            </div>
+        </div>
+    </div> *@
+
+        <div class="form-group">
+            <label for="CPassword">Парола</label>
+            <div class="toggle-password-container">
+                <input type="password" class="form-control" id="CPassword" name="Client.CPassword" required placeholder="Парола" />
+                <span class="toggle-password" onclick="toggleRPassword()">
+                    <img src="@Url.Content("~/eye_open.png")" id="eyeIcon1" alt="Toggle Password Visibility">
+                </span>
+            </div>
+            <ul id="password-requirements" class="text-danger small"></ul>
+            <span asp-validation-for="Client.CPassword" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label for="ConfirmPassword">Потвърди парола</label>
+            <div class="toggle-password-container">
+                <input type="password" class="form-control" id="ConfirmPassword"
+                       name="ConfirmPassword" placeholder="Потвърди парола">
+                <span class="toggle-password" onclick="toggleConfirmPassword()">
+                    <img src="@Url.Content("~/eye_open.png")" id="eyeIcon2" alt="Toggle Password Visibility">
+                </span>
+            </div>
+            <ul id="confirm-password-message" class="text-danger small"></ul>
+            <span asp-validation-for="Client.ConfirmPassword" class="text-danger"></span>
+        </div>
+
+    <button type="submit" class="btn btn-primary">Регистрация</button>
+</form>
+</div>
+
+<script>
+    document.getElementById("CPassword").addEventListener("input", function () {
+        var password = this.value;
+        var requirements = document.getElementById("password-requirements");
+        var isValid = true;
+
+        requirements.innerHTML = "";
+
+        if (password.length < 5) {
+            requirements.innerHTML += "<li>Паролата трябва да включва минимално 5 символа.</li>";
+            isValid = false;
+        }
+        if (!/(?=.*[a-z])/.test(password)) {
+            requirements.innerHTML += "<li>Паролата трябва да съдържа поне една малка буква.</li>";
+            isValid = false;
+        }
+        if (!/(?=.*[A-Z])/.test(password)) {
+            requirements.innerHTML += "<li>Паролата трябва да съдържа поне една главна буква.</li>";
+            isValid = false;
+        }
+        if (!/(?=.*\d)/.test(password)) {
+            requirements.innerHTML += "<li>Паролата трябва да съдържа поне една цифра.</li>";
+            isValid = false;
+        }
+        if (!/(?=.*[!@@#\\$%\\^&\\*])/.test(password)) {
+            requirements.innerHTML += "<li>Паролата трябва да съдържа поне един специален символ (например !, ?, #, и т.н.).</li>";
+            isValid = false;
+        }
+
+        if (isValid) {
+            requirements.innerHTML += "<li class='valid-password'>Паролата отговаря на всички изисквания.</li>";
+        }
+    });
+
+    document.getElementById("ConfirmPassword").addEventListener("input", function () {
+        var confirmPassword = this.value;
+        var password = document.getElementById("CPassword").value;
+        var confirmPasswordMessage = document.getElementById("confirm-password-message");
+
+        confirmPasswordMessage.innerHTML = "";
+
+        if (confirmPassword !== password) {
+            confirmPasswordMessage.innerHTML = "<li class='text-danger'>Паролите не съвпадат.</li>";
+        } else {
+            confirmPasswordMessage.innerHTML = "<li class='valid-password'>Паролите съвпадат.</li>";
+        }
+    });
+
+
+    function toggleRPassword() {
+        const passwordField = document.getElementById('CPassword');
+        const eyeIcon = document.getElementById('eyeIcon1');
+        const passwordFieldType = passwordField.getAttribute('type');
+
+        if (passwordFieldType === 'password') {
+            passwordField.setAttribute('type', 'text');
+            eyeIcon.setAttribute('src', '@Url.Content("~/eye_hidden.png")');
+        } else {
+            passwordField.setAttribute('type', 'password');
+            eyeIcon.setAttribute('src', '@Url.Content("~/eye_open.png")');
+        }
+    }
+
+
+    function toggleConfirmPassword() {
+        const passwordField = document.getElementById('ConfirmPassword');
+        const eyeIcon = document.getElementById('eyeIcon2');
+        const passwordFieldType = passwordField.getAttribute('type');
+
+        if (passwordFieldType === 'password') {
+            passwordField.setAttribute('type', 'text');
+            eyeIcon.setAttribute('src', '@Url.Content("~/eye_hidden.png")');
+        } else {
+            passwordField.setAttribute('type', 'password');
+            eyeIcon.setAttribute('src', '@Url.Content("~/eye_open.png")');
+        }
+    }
+</script>

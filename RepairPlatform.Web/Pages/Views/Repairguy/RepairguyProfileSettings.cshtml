@@ -1,0 +1,116 @@
+﻿@page
+@model RepairPlatform.Web.Pages.Views.Repairguy.RepairguyProfileSettingsModel
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Policy = "RequireRepairGuyRole")]
+
+@{
+    ViewData["Title"] = Model.Repairguy?.RfirstName + " " + Model.Repairguy?.RlastName;
+    var message = TempData["Message"] as string;
+    var messageType = TempData["MessageType"] as string;
+}
+
+<h2>Управлявай своя акаунт</h2>
+<h3>Промени настройките на своя акаунт</h3>
+
+@if (!string.IsNullOrEmpty(message))
+{
+    <div class="alert @(messageType == "success" ? "alert-success" : "alert-danger")">
+        @message
+    </div>
+}
+
+<div class="row">
+        <div class="col-md-4">
+            <ul class="nav flex-column nav-pills">
+                <li class="nav-item">
+                    <a class="nav-link active" asp-page="/Views/Repairguy/RepairguyProfileSettings">Профил</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-page="/Views/Repairguy/RepairguyProfileDetails">Детайли</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-page="/Views/Repairguy/RepairguyProfileChangePassword">Парола</a>
+                </li>
+            </ul>
+        </div>
+
+    <div class="col-md-8">
+        <form method="post" enctype="multipart/form-data">
+            <validation-summary class="text-danger"></validation-summary>
+
+
+            <div class="form-group">
+                <label for="firstName" class="required-label" title="Задължително поле за попълване.">Име:</label>
+                <input id="firstName" asp-for="Repairguy!.RfirstName" class="form-control" />
+                <span asp-validation-for="Repairguy!.RfirstName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label for="firstName" class="required-label" title="Задължително поле за попълване.">Фамилия:</label>
+                <input id="lastName" asp-for="Repairguy!.RlastName" class="form-control" />
+                <span asp-validation-for="Repairguy!.RlastName" class="text-danger"></span>
+            </div>
+@*             <div class="form-group">
+                <label for="firstName">Описание:</label>
+                <input asp-for="Repairguy!.Rdescription" class="form-control" />
+                <span asp-validation-for="Repairguy!.Rdescription" class="text-danger"></span>
+            </div> *@
+            <div class="form-group">
+                <label for="firstName" class="required-label" title="Задължително поле за попълване.">Имейл:</label>
+                <input asp-for="Repairguy!.Remail" class="form-control" />
+                <span asp-validation-for="Repairguy!.Remail" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label for="firstName" class="required-label" title="Задължително поле за попълване.">Телефон:</label>
+                <input asp-for="Repairguy!.Rtelephone" class="form-control" />
+                <span asp-validation-for="Repairguy!.Rtelephone" class="text-danger"></span>
+            </div>
+@*             <div class="form-group">
+                <label for="firstName">Град:</label>
+                <select asp-for="Repairguy!.TownId" class="form-control" asp-items="@(ViewData["Towns"] as SelectList)">
+                    <option value="">--Select--</option>
+                </select>
+                <span asp-validation-for="Repairguy!.TownId" class="text-danger"></span>
+            </div> *@
+
+
+
+@*             <div class="form-group">
+                <label>Ремонти:</label><br />
+                @foreach (var group in Model.GroupOptions)
+                {
+                    <h4>@group.Key</h4>
+                    @foreach (var repair in group.Value)
+                    {
+                        var isChecked = Model.Repairguy!.Repairs.Contains(repair.Value) ? "checked" : "";
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="SelectedRepairs" value="@repair.Value" @isChecked/>
+                            <label class="form-check-label" for="repair_@repair.Value">@repair.Text</label>
+                        </div>
+                    }
+                }
+            </div> *@
+
+            <div class="form-group">
+                <label asp-for="ProfilePicture">Профилна снимка:</label>
+                <input type="file" asp-for="ProfilePicture" class="form-control-file" />
+            </div>
+            @if (Model.Repairguy!.Rphoto != null)
+            {
+                <div class="form-group">
+                    <label>Текуща Профилна Снимка:</label>
+                    <img src="data:image;base64,@Convert.ToBase64String(Model.Repairguy.Rphoto)" alt="Profile Picture" class="img-thumbnail" width="150" height="150" />
+                </div>
+            }
+            <button id="saveProfile" type="submit" class="btn btn-primary">Save</button>
+        </form>
+    </div>
+</div>
+
+
+<style>
+    .required-label::after {
+        content: "*";
+        color: red;
+        margin-left: 5px;
+    }
+</style>

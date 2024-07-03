@@ -1,0 +1,128 @@
+﻿@page
+@model RepairPlatform.Web.Pages.Views.Repairguy.RepairguyHistoryReservationsModel
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Policy = "RequireRepairGuyRole")]
+@{
+    ViewData["Title"] = "Резервации";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="mb-0">Резервации</h1>
+    <button class="btn btn-primary" onclick="location.href='@Url.Page("RepairguyHistoryReservations", "ExportReservationsToExcel", new { status = Request.Query["status"], sortOption = Request.Query["sortOption"] })'">Експорт</button>
+</div>
+
+<div class="mb-3">
+    <form method="get" class="form-inline">
+        <label for="status" class="mr-2">Филтър по статус:</label>
+        <select id="status" name="status" class="form-control mr-2">
+            <option value="">Всички</option>
+            <option value="Приета">Приета</option>
+            <option value="Отхвърлена">Отхвърлена</option>
+            <option value="Завършена">Завършена</option>
+            <option value="В очакване">В очакване</option>
+        </select>
+
+        <label for="sortOption" class="mr-2">Сортиране по:</label>
+        <select id="sortOption" name="sortOption" class="form-control mr-2">
+            <option value="">Избери</option>
+            <option value="dateAsc">Дата (възходящ ред)</option>
+            <option value="dateDesc">Дата (низходящ ред)</option>
+        </select>
+
+        <button type="submit" class="btn btn-primary">Филтрирай и Сортирай</button>
+    </form>
+</div>
+
+@if (Model.Reservations != null && Model.Reservations.Count > 0)
+{
+<table class="table">
+    <thead>
+        <tr>
+            <th>Клиент</th>
+            <th>Ремонт</th>
+            <th>Категория</th>
+            <th>Дата и Час</th>
+            <th>Място</th>
+            <th>Коментар</th>
+            <th>Статус</th>
+            <th>Действия</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var reservation in Model.Reservations!)
+        {
+            <tr>
+                <td>@reservation.Client.CfirstName @reservation.Client.ClastName</td>
+                <td>@reservation.ResName</td>
+                <td>@reservation.Group.CatName</td>
+                <td>@reservation.ResDateTime</td>
+                <td>@reservation.ResLocation</td>
+                <td>@reservation.ResComment</td>
+                    <td>
+                        @if (Model.EditReservationId == reservation.ReservationId)
+                        {
+                            <form method="post" asp-page-handler="ChangeReservationStatus" asp-route-id="@reservation.ReservationId">
+                                <select name="status" asp-items="Model.GetStatusOptions(reservation.ResStatus)">
+                                </select>
+                                <button type="submit" class="btn btn-primary">Save</button>
+                                <button type="button" class="btn btn-secondary" onclick="location.href='@Url.Page("/Views/Repairguy/RepairguyHistoryReservations")'">Отказ</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <span class="@Model.GetStatusClass(reservation.ResStatus)">
+                                @(reservation.ResStatus ?? "В очакване")
+                            </span>
+                        }
+                    </td>
+                    <td>
+                        @if (Model.EditReservationId != reservation.ReservationId)
+                        {
+                            <form method="post" asp-page-handler="EditReservation" asp-route-id="@reservation.ReservationId" style="display:inline;">
+                                <button type="submit" class="btn btn-link">Промяна</button>
+                            </form>
+                        }
+                    </td>
+            </tr>
+        }
+    </tbody>
+</table>
+}
+else
+{
+<p>Няма съществуващи резервации.</p>
+}
+
+
+@section Styles {
+    <style>
+        .status-pending {
+            background-color: yellow;
+            color: black;
+            padding: 5px;
+            border-radius: 5px;
+        }
+
+        .status-accepted {
+            background-color: green;
+            color: white;
+            padding: 5px;
+            border-radius: 5px;
+        }
+
+        .status-declined {
+            background-color: red;
+            color: white;
+            padding: 5px;
+            border-radius: 5px;
+        }
+
+        .status-completed {
+            background-color: blue;
+            color: white;
+            padding: 5px;
+            border-radius: 5px;
+        }
+
+    </style>
+}

@@ -1,0 +1,352 @@
+﻿@page 
+@model RepairPlatform.Web.Pages.Views.Client.ClientViewModel
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Policy = "RequireClientRole")]
+
+@{
+    ViewData["Title"] = "Начало";
+    var defaultProfileImageUrl = Url.Content("~/profile-circle-icon-512x512-zxne30hp.png");
+    
+    string GetStatusText(string status)
+    {
+        return status.ToLower() == "active" ? "Активен" : "Неактивен";
+    }
+
+
+    string RenderStars(double rating)
+    {
+        var fullStars = (int)Math.Floor(rating);
+        var partialStarWidth = (rating - fullStars) * 100;
+        var emptyStars = 5 - fullStars - (partialStarWidth > 0 ? 1 : 0);
+
+        var starsHtml = new System.Text.StringBuilder();
+
+        for (var i = 0; i < fullStars; i++)
+        {
+            starsHtml.Append("<span class='star filled'>★</span>");
+        }
+
+        if (partialStarWidth > 0)
+        {
+            starsHtml.Append($"<span class='star partial' style='--partial-width: {partialStarWidth}%;'>★</span>");
+        }
+
+        for (var i = 0; i < emptyStars; i++)
+        {
+            starsHtml.Append("<span class='star'>★</span>");
+        }
+
+        return starsHtml.ToString();
+    }
+
+}
+
+@* <p>Client ID: @Model.Id</p> *@
+
+
+    @if (Model.Client != null)
+    {
+        <div class="client-info">
+            <div class="client-profile">
+
+            @if ((Convert.ToBase64String(Model.Client.Cphoto!) != null) && (Convert.ToBase64String(Model.Client.Cphoto!).Length! > 0))
+            {
+
+                <img src="data:image;base64,@Convert.ToBase64String(Model.Client.Cphoto!)" alt="Profile Picture" class="client-profile-picture" />
+            }
+
+            else
+            {
+                <img src="@defaultProfileImageUrl" alt="Profile Picture" class="client-profile-picture" />
+            }
+
+                <div class="client-details">
+                    <h2>@Model.Client.CfirstName @Model.Client.ClastName</h2>
+                <p>
+                    Статус:
+                    <span class="status-dot @(Model.Client.Cstatus!.ToLower() == "active" ? "status-active" : "status-inactive")"></span>
+                    <span class="status-label">@GetStatusText(Model.Client.Cstatus)</span>
+                </p>
+                </div>
+            </div>
+        </div>
+    }
+
+
+    <div class="search-container">
+        <form method="get" class="search-form">
+            <div class="input-group">
+            <input type="hidden" name="id" value="@Model.Id" />
+            <input type="hidden" name="pageNumber" value="1" />
+                <input type="text" class="form-control search-input" asp-for="SearchTerm" placeholder="Search...">
+                <div class="input-group-append">
+                    <button type="submit" class="btn btn-primary search-button">Търсене</button>                   
+                </div>
+
+            <div class="input-group-append">
+                <select id="sortOptions" name="sortOption" class="form-control">
+                    <option value="">Сортирай</option>
+                    <option value="firstNameAsc">Име на Майстор (възходящ ред)</option>
+                    <option value="firstNameDesc">Име на Майстор (низходящ ред)</option>
+                    <option value="ratingAsc">Оценка (възходящ ред)</option>
+                    <option value="ratingDesc">Оценка (низходящ ред)</option>
+                </select>                
+            </div>
+            <div class="input-group-append">
+            <button type="submit" class="btn btn-secondary sort-button">Сортирай</button>
+            </div>
+
+            <div class="input-group-append">
+                <select id="groupOptions" name="GroupOption" class="form-control">
+                    <option value="">Избери група</option>
+                    @foreach (var group in Model.Groups)
+                    {
+                        <option value="@group">@group</option>
+                    }
+                </select>
+            </div>
+            <div class="input-group-append">
+                <select id="townOptions" name="TownOption" class="form-control">
+                    <option value="">Избери град</option>
+                    @foreach (var town in Model.Towns)
+                    {
+                        <option value="@town">@town</option>
+                    }
+                </select>
+            </div>
+            <div class="input-group-append">
+            <button type="submit" class="btn btn-secondary filter-button">Филтрирай</button>
+            </div>
+        </div>
+        </form>
+    </div>
+
+
+@if (Model.Repairguys != null)
+{
+<div class="repairguys-container">
+            @foreach (var repairguy in Model.Repairguys!)
+            {
+                @if (repairguy.Rstatus.ToLower() == "active")
+                {
+                <div class="repairguy-card">
+                    @* @if ((Convert.ToBase64String(repairguy.Rphoto!)!=null)&&(Convert.ToBase64String(repairguy.Rphoto!).Length!>0)) *@
+                    @if (repairguy.Rphoto != null && Convert.ToBase64String(repairguy.Rphoto!).Length > 0)
+                    {
+                        
+                        <img src="data:image;base64,@Convert.ToBase64String(repairguy.Rphoto!)" alt="Profile Picture" class="repairguy-profile-picture" />
+                    }
+                    
+                    else
+                    {
+                        <img src="@defaultProfileImageUrl" alt="Profile Picture" class="repairguy-profile-picture" />
+                    }
+                        <div class="repairguy-details">
+                            <a asp-page="/Views/Client/RepairguyProfile" asp-route-id="@repairguy.RepairguyId">@repairguy.RfirstName @repairguy.RlastName</a>
+                        <p>
+                            <div class="rating-container">
+                                <span class="rating-stars">@Html.Raw(RenderStars(Model.RepairguysWithRating.First(r => r.Repairguy.RepairguyId == repairguy.RepairguyId).AverageRating))</span>
+                                <span class="rating-number">@Model.RepairguysWithRating.First(r => r.Repairguy.RepairguyId == repairguy.RepairguyId).AverageRating</span>
+                            </div>
+                        </p>
+                        <p class="status-info">
+                            Статус:
+                            <span class="status-dot @(repairguy.Rstatus!.ToLower() == "active" ? "status-active" : "status-inactive")"></span>
+                            <span class="status-label">@GetStatusText(repairguy.Rstatus)</span>
+                        </p>
+
+                        <p class="town-info">Град: @repairguy.Town.Name</p>
+                        <p class="groups-info">Групи:</p>
+                        <ul class="groups-list">
+                            @foreach (var group in repairguy.Groups)
+                            {
+                                <li>@group</li>
+                            }
+                        </ul>
+                        <p>@repairguy.Rdescription</p>
+                        </div>
+                </div>
+                }
+            }
+    </div>
+}
+
+@if (Model.TotalPages > 1)
+{
+    <nav aria-label="Страници">
+        <ul class="pagination">
+            <li class="page-item @(Model.PageNumber == 1 ? "disabled" : "")">
+                <a class="page-link" asp-route-id="@Model.Id" asp-route-pageNumber="@(Model.PageNumber - 1)" aria-label="Предишна">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            @for (var i = 1; i <= Model.TotalPages; i++)
+            {
+                <li class="page-item @(Model.PageNumber == i ? "active" : "")">
+                    <a class="page-link" asp-route-id="@Model.Id" asp-route-pageNumber="@i">@i</a>
+                </li>
+            }
+            <li class="page-item @(Model.PageNumber == Model.TotalPages ? "disabled" : "")">
+                <a class="page-link" asp-route-id="@Model.Id" asp-route-pageNumber="@(Model.PageNumber + 1)" aria-label="Следваща">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+}
+
+
+    <style>
+        .client-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .client-profile {
+            display: flex;
+            align-items: center;
+        
+        }
+
+        .client-profile-picture {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            margin-right: 15px;
+        }
+
+        .client-details {
+            display: flex;
+            flex-direction: column;
+        margin-left: 15px;
+        }
+
+
+    .status-dot {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-right: 1px;
+        margin-left: 5px;
+    }
+
+    .status-active {
+        background-color: green;
+    }
+
+    .status-inactive {
+        background-color: red;
+    }
+
+    .search-container {
+        margin-bottom: 20px;
+    }
+
+    .repairguys-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .repairguy-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 200px;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .repairguy-profile-picture {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        margin-bottom: 10px;
+    }
+
+    .repairguy-details {
+        text-align: center;
+    }
+
+        .repairguy-details a {
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .repairguy-details p {
+            margin: 0;
+            color: #555;
+        }
+
+        .repairguy-details .status-info {
+            margin-bottom: 10px; 
+        }
+
+        .repairguy-details .town-info {
+            margin-bottom: 10px;
+        }
+
+        .repairguy-details .groups-info {
+            margin-bottom: 10px;
+        }
+
+    .groups-list {
+        padding-left: 20px;
+        margin-top: 5px; 
+    }
+
+        .groups-list li {
+            list-style-type: disc; 
+            margin-bottom: 5px; 
+        }
+
+
+    .rating-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px; 
+    }
+
+    .rating-stars {
+        display: flex;
+    }
+
+        .rating-stars .star {
+            color: #ddd;
+            position: relative;
+            display: inline-block;
+            font-size: 1.5em;
+        }
+
+            .rating-stars .star.filled {
+                color: #f5b301;
+            }
+
+/*             .rating-stars .star.partial {
+                position: relative;
+                color: #f5b301;
+            } */
+
+                .rating-stars .star.partial:before {
+                    content: '★';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    overflow: hidden;
+                    color: #f5b301;
+                    width: var(--partial-width, 0%);
+                }
+
+    .rating-number {
+        font-size: 1.5em;
+        color: #333;
+        margin-left: 5px; 
+    }
+    </style>
+

@@ -1,0 +1,109 @@
+﻿@page
+@model RepairPlatform.Web.Pages.Views.Client.ClientHistoryReservationsModel
+@{
+}
+
+<h2>Моите резервации</h2>
+
+@if (Model.Reservations != null && Model.Reservations.Count > 0)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Майстор</th>
+                <th>Име на Ремонт</th>
+                <th>Категория</th>
+                <th>Дата и Час</th>
+                <th>Град</th>
+                <th>Адрес</th>
+                <th>Коментар</th>
+                <th>Статус</th>
+                <th>Действие</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var reservation in Model.Reservations)
+            {
+                <tr>
+                    <td>@reservation.Repairguy.RfirstName @reservation.Repairguy.RlastName</td>
+                    <td>@reservation.ResName</td>
+                    <td>@reservation.Group.CatName</td>
+                    <td>@reservation.ResDateTime</td>
+                    <td>@reservation.Repairguy.Town.Name</td>
+                    <td>@reservation.ResLocation</td>
+                    <td>@reservation.ResComment</td>
+                    <td>
+                        <span class="@Model.GetStatusClass(reservation.ResStatus)">
+                            @(reservation.ResStatus ?? "В очакване")
+                        </span>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-link" onclick="showDeleteModal(@reservation.ReservationId)">Изтрий</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No reservations found.</p>
+}
+
+
+<div class="modal fade" id="deleteConfirmationModal" tabindex="-1" role="dialog" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteConfirmationModalLabel">Потвърдете изтриването</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Сигурни ли сте, че искате да изтриете тази резервация? С изтриването на резервация ще се изтрие и вашето ревю към нея.
+            </div>
+            <div class="modal-footer">
+                <form method="post" asp-page-handler="Delete" id="deleteForm">
+                    <input type="hidden" name="reservationId" id="reservationId" />
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Отказ</button>
+                    <button type="submit" class="btn btn-danger">Изтрий</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function showDeleteModal(reservationId) {
+            document.getElementById('reservationId').value = reservationId;
+            $('#deleteConfirmationModal').modal('show');
+        }
+    </script>
+}
+
+@section Styles {
+    <style>
+        .status-pending {
+            background-color: yellow;
+            color: black;
+            padding: 5px;
+            border-radius: 5px;
+        }
+
+        .status-accepted {
+            background-color: green;
+            color: white;
+            padding: 5px;
+            border-radius: 5px;
+        }
+
+        .status-declined {
+            background-color: red;
+            color: white;
+            padding: 5px;
+            border-radius: 5px;
+        }
+    </style>
+}

@@ -1,0 +1,111 @@
+﻿@page
+@model RepairPlatform.Web.Pages.Views.Client.ClientProfileSettingsModel
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Policy = "RequireClientRole")]
+@{
+    var message = TempData["Message"] as string;
+    var messageType = TempData["MessageType"] as string;
+}
+
+
+<h2>Управлявай своя акаунт</h2>
+<h3>Промени настройките на своя акаунт</h3>
+
+@if (!string.IsNullOrEmpty(message))
+{
+    <div class="alert @(messageType == "success" ? "alert-success" : "alert-danger")">
+        @message
+    </div>
+}
+
+
+<div class="row">
+    <div class="col-md-4">
+        <ul class="nav flex-column nav-pills">
+            <li class="nav-item">
+                <a class="nav-link active" asp-page="/Views/Client/ClientProfile">Профил</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" asp-page="/Views/Client/ClientChangePassword">Парола</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" asp-page="./TwoFactorAuthentication">Двуфакторна автентификация</a>
+            </li>
+        </ul>
+    </div>
+    <div class="col-md-8">
+        <form method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label asp-for="Client!.CfirstName"></label>
+                <input id="firstName" asp-for="Client!.CfirstName" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label asp-for="Client!.ClastName"></label>
+                <input id="lastName" asp-for="Client!.ClastName" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label asp-for="Client!.Cemail"></label>
+                <input asp-for="Client!.Cemail" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label asp-for="Client!.Ctelephone"></label>
+                <input asp-for="Client!.Ctelephone" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label asp-for="ProfilePicture"></label>
+                <input type="file" asp-for="ProfilePicture" class="form-control-file" />
+            </div>
+            @if (Model.Client!.Cphoto != null)
+            {
+                <div class="form-group">
+                    <label>Текуща Профилна Снимка:</label>
+                    <img src="data:image;base64,@Convert.ToBase64String(Model.Client.Cphoto)" alt="Profile Picture" class="img-thumbnail" width="150" height="150" />
+                </div>
+            }
+            <button id="saveProfile" type="submit" class="btn btn-primary">Save</button>
+        </form>
+    </div>
+</div>
+
+@* <script>
+    document.addEventListener('DOMContentLoaded', function () {
+       
+        const firstNameInput = document.getElementById('firstName');
+        const lastNameInput = document.getElementById('lastName');
+        const navbarUserName = document.getElementById('navbarUserName');
+        const saveProfileButton = document.getElementById('saveProfile');
+
+        function updateNavbar() {
+            navbarUserName.textContent = `${firstNameInput.value} ${lastNameInput.value}`;
+        }
+
+        firstNameInput.addEventListener('input', updateNavbar);
+        lastNameInput.addEventListener('input', updateNavbar);
+
+        saveProfileButton.addEventListener('click', function (event) {
+            event.preventDefault(); // Prevent form submission
+            const data = {
+                firstName: firstNameInput.value,
+                lastName: lastNameInput.value
+            };
+            alert(indow.location.pathname + '/ClientProfile');
+            fetch(window.location.pathname + '/ClientProfile', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        alert('Profile updated successfully');
+                    } else {
+                        alert('Failed to update profile');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        });
+    });
+
+</script> *@

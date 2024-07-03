@@ -1,0 +1,55 @@
+﻿@page
+@model RepairPlatform.Web.Pages.Register.RegisterModel
+@{
+    ViewData["Title"] = "Регистрация";
+}
+
+<div class="form-container">
+    <div class="text-center">
+        <h1>Регистрация</h1>
+        <p>Моля, изберете вашата роля:</p>
+        <a class="btn btn-primary" href="/Register/RegisterRepairguy">Майстор</a>
+        <a class="btn btn-secondary" href="/Register/RegisterClient">Клиент</a>
+    </div>
+</div>
+
+
+<style>
+
+    .form-container {
+        border: 2px solid #ccc; 
+        padding: 20px; 
+        border-radius: 10px;
+        background-color: #f9f9f9;
+        max-width: 400px; 
+        margin: 0 auto; 
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+    }
+
+    .text-center {
+        text-align: center;
+    }
+
+    .btn-primary {
+        background-color: rgb(255, 145, 77); 
+        border-color: rgb(255, 145, 77); 
+        color: white; 
+    }
+
+        .btn-primary:hover {
+            background-color: rgb(255, 128, 51); 
+            border-color: rgb(255, 128, 51); 
+            color: white; 
+        }
+
+    .btn-secondary {
+        background-color: rgb(255, 145, 77); 
+        border-color: rgb(255, 145, 77); 
+        color: white; 
+    }
+
+        .btn-secondary:hover {
+            background-color: rgb(255, 128, 51);
+            border-color: 
+        }
+</style>

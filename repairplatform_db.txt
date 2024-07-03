@@ -1,0 +1,349 @@
+	-- Create the database
+	CREATE DATABASE [Repairman_20118046]
+	COLLATE Cyrillic_General_CI_AI;
+	GO
+
+	-- Use the created database
+	USE [Repairman_20118046];
+	GO
+
+	-- Create schema
+	CREATE SCHEMA [20118046];
+	GO
+
+	-- Use the created database
+	USE [Repairman_20118046];
+	GO
+
+	-- Create the Repairman table
+	CREATE TABLE [20118046].[Repairman] (
+		RepairmanId INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+		RFirstName VARCHAR(50) NOT NULL,
+		RLastName VARCHAR(50) NOT NULL,
+		RTelephone VARCHAR(20) NOT NULL,
+		REmail VARCHAR(255) NOT NULL,
+		RPassword NVARCHAR(255) NOT NULL,
+		RDescription TEXT,
+		RPhoto VARBINARY(MAX),
+		RStatus NVARCHAR(50) DEFAULT 'Active',
+		LastModified_20118046 DATETIME NOT NULL DEFAULT GETDATE()
+	);
+	GO
+
+	-- Use the created database
+	USE [Repairman_20118046];
+	GO
+
+	-- Create the Customer table
+	CREATE TABLE [20118046].[Client] (
+		ClientId INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+		CFirstName VARCHAR(50) NOT NULL,
+		CLastName VARCHAR(50) NOT NULL,
+		CTelephone VARCHAR(20) NOT NULL,
+		CEmail VARCHAR(255) NOT NULL,
+		CPassword NVARCHAR(255) NOT NULL,
+		CPhoto VARBINARY(MAX),
+		CStatus NVARCHAR(50) DEFAULT 'Active',
+		LastModified_20118046 DATETIME NOT NULL DEFAULT GETDATE()
+	);
+	GO
+
+	-- Use the created database
+	USE [Repairman_20118046];
+	GO
+
+	-- Create the Repair table
+	CREATE TABLE [20118046].[Repair] (
+		RepairId INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+		RepName VARCHAR(255) NOT NULL,
+		RepDescription TEXT,
+		LastModified_20118046 DATETIME NOT NULL DEFAULT GETDATE()
+	);
+	GO
+
+
+	-- Use the created database
+	USE [Repairman_20118046];
+	GO
+
+	-- Create the CategoryRepair table
+	CREATE TABLE [20118046].[CategoryRepair] (
+		CategoryId INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+		CatName VARCHAR(255) NOT NULL,
+		CatDescription TEXT,
+		LastModified_20118046 DATETIME NOT NULL DEFAULT GETDATE()
+	);
+	GO
+
+	-- Use the created database
+	USE [Repairman_20118046];
+	GO
+
+	-- Create the Reservation table
+	CREATE TABLE [20118046].[Reservation] (
+		ReservationId INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+		ClientId INT NOT NULL,
+		RepairmanId INT NOT NULL,
+		ResName VARCHAR(255) NOT NULL,
+		ResDateTime DATETIME NOT NULL,
+		CategoryId INT NOT NULL,
+		ResLocation VARCHAR(255) NOT NULL,
+		ResComment TEXT,
+		LastModified_20118046 DATETIME NOT NULL DEFAULT GETDATE(),
+		CONSTRAINT FK_Reservation_Client FOREIGN KEY (ClientId) REFERENCES [20118046].[Client](ClientId),
+		CONSTRAINT FK_Reservation_Repairman FOREIGN KEY (RepairmanId) REFERENCES [20118046].[Repairman](RepairmanId),
+		CONSTRAINT FK_Reservation_CategoryRepair FOREIGN KEY (CategoryId) REFERENCES [20118046].[CategoryRepair](CategoryId)
+	);
+	GO
+
+
+	-- Use the created database
+	USE [Repairman_20118046];
+	GO
+
+	-- Create the Review table
+	CREATE TABLE [20118046].[Review] (
+		ReviewId INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+		RepairmanId INT NOT NULL,
+		ClientId INT NOT NULL,
+		Rating INT CHECK (Rating >= 1 AND Rating <= 5) NOT NULL,
+		RevDateTime DATETIME NOT NULL,
+		CategoryId INT NOT NULL,
+		RevLocation VARCHAR(255) NOT NULL,
+		RevComment TEXT,
+		LastModified_20118046 DATETIME NOT NULL DEFAULT GETDATE(),
+		CONSTRAINT FK_Review_Client FOREIGN KEY (ClientId) REFERENCES [20118046].[Client](ClientId),
+		CONSTRAINT FK_Review_CategoryRepair FOREIGN KEY (CategoryId) REFERENCES [20118046].[CategoryRepair](CategoryId)
+	);
+	GO
+
+
+	-- Use the created database
+	USE [Repairman_20118046];
+	GO
+
+	-- Create the RepairmanRepairs table (relationship table)
+	CREATE TABLE [20118046].[RepairmanRepairs] (
+		RepairmanId INT NOT NULL,
+		RepairId INT NOT NULL,
+		LastModified_20118046 DATETIME NOT NULL DEFAULT GETDATE(),
+		PRIMARY KEY (RepairmanId, RepairId),
+		CONSTRAINT FK_RepairmanRepairs_Repairman FOREIGN KEY (RepairmanId) REFERENCES [20118046].[Repairman](RepairmanId),
+		CONSTRAINT FK_RepairmanRepairs_Repair FOREIGN KEY (RepairId) REFERENCES [20118046].[Repair](RepairId)
+	);
+	GO
+
+
+	-- Use the created database
+	USE [Repairman_20118046];
+	GO
+
+	-- Create the RepairCategoriesRepair table (relationship table)
+	CREATE TABLE [20118046].[RepairCategoriesRepair] (
+		RepairId INT NOT NULL,
+		CategoryId INT NOT NULL,
+		LastModified_20118046 DATETIME NOT NULL DEFAULT GETDATE(),
+		PRIMARY KEY (RepairId, CategoryId),
+		CONSTRAINT FK_RepairCategoriesRepair_Repair FOREIGN KEY (RepairId) REFERENCES [20118046].[Repair](RepairId),
+		CONSTRAINT FK_RepairCategoriesRepair_CategoryRepair FOREIGN KEY (CategoryId) REFERENCES [20118046].[CategoryRepair](CategoryId)
+	);
+	GO
+
+	-- Use the created database
+	USE [Repairman_20118046];
+	GO
+
+	-- Create the Administrator table
+	CREATE TABLE [20118046].[Administrator] (
+		AdministratorID INT PRIMARY KEY IDENTITY(1,1),
+		AFullName NVARCHAR(100) NOT NULL,
+		AEmail VARCHAR(255) NOT NULL UNIQUE,
+		APasswordHash VARBINARY(MAX) NOT NULL,
+		LastModified_20118046 DATETIME NOT NULL DEFAULT GETDATE()
+	);
+	GO
+
+
+	-- Use the created database
+	USE [Repairman_20118046];
+	GO
+
+	-- Create log table
+	CREATE TABLE [20118046].[log_20118046] (
+		LogID INT PRIMARY KEY IDENTITY(1,1),
+		TableName NVARCHAR(100) NOT NULL,
+		OperationType NVARCHAR(10) NOT NULL,
+		OperationDateTime DATETIME NOT NULL DEFAULT GETDATE(),
+		AdministratorID INT NULL
+	);
+	GO
+
+
+
+	-- Use the created database
+	USE [Repairman_20118046];
+	GO
+
+	-- Create a trigger for Repairman table
+	CREATE TRIGGER [20118046].[trg_Repairman_InsertUpdate]
+	ON [20118046].[Repairman]
+	AFTER INSERT, UPDATE
+	AS
+	BEGIN
+		-- Update LastModified column
+		UPDATE [20118046].[Repairman]
+		SET LastModified_20118046 = GETDATE()
+		WHERE RepairmanId IN (SELECT RepairmanId FROM inserted);
+    
+		-- Insert log entry
+		INSERT INTO [20118046].[log_20118046] (TableName, OperationType, OperationDateTime)
+		VALUES ('Repairman', CASE WHEN EXISTS (SELECT * FROM inserted) AND EXISTS (SELECT * FROM deleted) THEN 'UPDATE' ELSE 'INSERT' END, GETDATE());
+	END;
+	GO
+
+	-- Use the created database
+	USE [Repairman_20118046];
+	GO
+
+	-- Create a trigger for Customer table
+	CREATE TRIGGER [20118046].[trg_Client_InsertUpdate]
+	ON [20118046].[Client]
+	AFTER INSERT, UPDATE
+	AS
+	BEGIN
+		-- Update LastModified column
+		UPDATE [20118046].[Client]
+		SET LastModified_20118046 = GETDATE()
+		WHERE ClientId IN (SELECT ClientId FROM inserted);
+    
+		-- Insert log entry
+		INSERT INTO [20118046].[log_20118046] (TableName, OperationType, OperationDateTime)
+		VALUES ('Customer', CASE WHEN EXISTS (SELECT * FROM inserted) AND EXISTS (SELECT * FROM deleted) THEN 'UPDATE' ELSE 'INSERT' END, GETDATE());
+	END;
+	GO
+
+	-- Use the created database
+	USE [Repairman_20118046];
+	GO
+
+	-- Create a trigger for Repair table
+	CREATE TRIGGER [20118046].[trg_Repair_InsertUpdate]
+	ON [20118046].[Repair]
+	AFTER INSERT, UPDATE
+	AS
+	BEGIN
+		-- Update LastModified column
+		UPDATE [20118046].Repair
+		SET LastModified_20118046 = GETDATE()
+		WHERE RepairId IN (SELECT RepairId FROM inserted);
+    
+		-- Insert log entry
+		INSERT INTO [20118046].[log_20118046] (TableName, OperationType, OperationDateTime)
+		VALUES ('Repair', CASE WHEN EXISTS (SELECT * FROM inserted) AND EXISTS (SELECT * FROM deleted) THEN 'UPDATE' ELSE 'INSERT' END, GETDATE());
+	END;
+	GO
+
+	-- Use the created database
+	USE [Repairman_20118046];
+	GO
+
+	-- Create a trigger for CategoryRepair table
+	CREATE TRIGGER [20118046].[trg_CategoryRepair_InsertUpdate]
+	ON [20118046].[CategoryRepair]
+	AFTER INSERT, UPDATE
+	AS
+	BEGIN
+		-- Update LastModified column
+		UPDATE [20118046].[CategoryRepair]
+		SET LastModified_20118046 = GETDATE()
+		WHERE CategoryId IN (SELECT CategoryId FROM inserted);
+    
+		-- Insert log entry
+		INSERT INTO [20118046].[log_20118046] (TableName, OperationType, OperationDateTime)
+		VALUES ('CategoryRepair', CASE WHEN EXISTS (SELECT * FROM inserted) AND EXISTS (SELECT * FROM deleted) THEN 'UPDATE' ELSE 'INSERT' END, GETDATE());
+	END;
+	GO
+
+	-- Use the created database
+	USE [Repairman_20118046];
+	GO
+
+	-- Create a trigger for Reservation table
+	CREATE TRIGGER [20118046].[trg_Reservation_InsertUpdate]
+	ON [20118046].[Reservation]
+	AFTER INSERT, UPDATE
+	AS
+	BEGIN
+		-- Update LastModified column
+		UPDATE [20118046].[Reservation]
+		SET LastModified_20118046 = GETDATE()
+		WHERE ReservationId IN (SELECT ReservationId FROM inserted);
+    
+		-- Insert log entry
+		INSERT INTO [20118046].[log_20118046] (TableName, OperationType, OperationDateTime)
+		VALUES ('Reservation', CASE WHEN EXISTS (SELECT * FROM inserted) AND EXISTS (SELECT * FROM deleted) THEN 'UPDATE' ELSE 'INSERT' END, GETDATE());
+	END;
+	GO
+
+	-- Use the created database
+	USE [Repairman_20118046];
+	GO
+
+	-- Create a trigger for Review table
+	CREATE TRIGGER [20118046].[trg_Review_InsertUpdate]
+	ON [20118046].[Review]
+	AFTER INSERT, UPDATE
+	AS
+	BEGIN
+		-- Update LastModified column
+		UPDATE [20118046].[Review]
+		SET LastModified_20118046 = GETDATE()
+		WHERE ReviewId IN (SELECT ReviewId FROM inserted);
+    
+		-- Insert log entry
+		INSERT INTO [20118046].[log_20118046] (TableName, OperationType, OperationDateTime)
+		VALUES ('Review', CASE WHEN EXISTS (SELECT * FROM inserted) AND EXISTS (SELECT * FROM deleted) THEN 'UPDATE' ELSE 'INSERT' END, GETDATE());
+	END;
+	GO
+
+	-- Use the created database
+	USE [Repairman_20118046];
+	GO
+
+	-- Create a trigger for RepairmanRepairs table
+	CREATE TRIGGER [20118046].[trg_RepairmanRepairs_InsertUpdate]
+	ON [20118046].[RepairmanRepairs]
+	AFTER INSERT, UPDATE
+	AS
+	BEGIN
+		-- Update LastModified column
+		UPDATE [20118046].[RepairmanRepairs]
+		SET LastModified_20118046 = GETDATE()
+		WHERE RepairmanId IN (SELECT RepairmanId FROM inserted) AND RepairId IN (SELECT RepairId FROM inserted);
+    
+		-- Insert log entry
+		INSERT INTO [20118046].[log_20118046] (TableName, OperationType, OperationDateTime)
+		VALUES ('RepairmanRepairs', CASE WHEN EXISTS (SELECT * FROM inserted) AND EXISTS (SELECT * FROM deleted) THEN 'UPDATE' ELSE 'INSERT' END, GETDATE());
+	END;
+	GO
+
+	-- Use the created database
+	USE [Repairman_20118046];
+	GO
+
+	-- Create a trigger for RepairCategoriesRepair table
+	CREATE TRIGGER [20118046].[trg_RepairCategoriesRepair_InsertUpdate]
+	ON [20118046].[RepairCategoriesRepair]
+	AFTER INSERT, UPDATE
+	AS
+	BEGIN
+		-- Update LastModified column
+		UPDATE [20118046].[RepairCategoriesRepair]
+		SET LastModified_20118046 = GETDATE()
+		WHERE RepairId IN (SELECT RepairId FROM inserted) AND CategoryId IN (SELECT CategoryId FROM inserted);
+    
+		-- Insert log entry
+		INSERT INTO [20118046].[log_20118046] (TableName, OperationType, OperationDateTime)
+		VALUES ('RepairCategoriesRepair', CASE WHEN EXISTS (SELECT * FROM inserted) AND EXISTS (SELECT * FROM deleted) THEN 'UPDATE' ELSE 'INSERT' END, GETDATE());
+	END;
+	GO

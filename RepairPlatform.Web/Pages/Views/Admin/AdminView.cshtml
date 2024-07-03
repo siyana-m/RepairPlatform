@@ -1,0 +1,9 @@
+﻿@page
+@model RepairPlatform.Web.Pages.Views.Admin.AdminViewModel
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Policy = "RequireAdminRole")]
+@{
+    ViewData["Title"] = "Начало | Админ";
+}
+
+<h1>Здравей, Админ!</h1>

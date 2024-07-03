@@ -1,0 +1,31 @@
+﻿@page
+@model RepairPlatform.Web.Pages.Reservation.SuccessfulReservationModel
+@{
+}
+
+<h2>Успешна Регистрация!</h2>
+
+<form method="post">
+    <input type="hidden" name="ReservationId" value="@Model.Reservation!.ReservationId" />
+    <div class="form-group">
+        <label for="ResName">Name</label>
+        <input type="text" id="ResName" name="ResName" class="form-control" value="@Model.Reservation!.ResName" readonly />
+    </div>
+    <div class="form-group">
+        <label for="Group">Group</label>
+        <input type="text" id="Group" name="Group" class="form-control" value="@Model.Reservation!.Group.CatName" readonly />
+    </div>
+    <div class="form-group">
+        <label for="ResDateTime">Date</label>
+        <input type="datetime-text" id="ResDateTime" name="ResDateTime" class="form-control" value="@Model.Reservation.ResDateTime.ToShortDateString()" readonly />
+    </div>
+    <div class="form-group">
+        <label for="ResLocation">Location</label>
+        <input type="text" id="ResLocation" name="ResLocation" class="form-control" value="@Model.Reservation.ResLocation" readonly />
+    </div>
+    <div class="form-group">
+        <label for="ResComment">Comment</label>
+        <textarea id="ResComment" name="ResComment" class="form-control" readonly>@Model.Reservation.ResComment</textarea>
+    </div>
+    <button type="submit" name="action" value="back" class="btn btn-warning">Back</button>
+</form>

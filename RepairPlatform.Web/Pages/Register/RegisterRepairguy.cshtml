@@ -1,0 +1,204 @@
+﻿@page "/Register/RegisterRepairguy"
+@model RepairPlatform.Web.Pages.Register.RegisterRepairguyModel
+@{
+    ViewData["Title"] = "Регистрация | Майстор";
+    var message = TempData["Message"] as string;
+    var messageType = TempData["MessageType"] as string;
+}
+
+<style>
+    .register-container {
+        max-width: 500px; /
+        margin: 0 auto; 
+        padding: 30px; 
+        border: 1px solid #ccc; 
+        border-radius: 10px; 
+        background-color: #f9f9f9; 
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+    }
+
+
+    select {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-color: white;
+        padding-right: 40px; 
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem; 
+        height: calc(1.5em + 0.75rem + 2px);
+        line-height: 1.5;
+    }
+
+        select::-ms-expand {
+            display: none;
+        }
+
+    .toggle-password-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .toggle-password {
+        position: absolute;
+        right: 10px;
+        cursor: pointer;
+    }
+
+        .toggle-password img {
+            width: 20px;
+        }
+    
+    .valid-password {
+        color: green;
+    }
+</style>
+
+@if (!string.IsNullOrEmpty(message))
+{
+    <div class="alert @(messageType == "success" ? "alert-success" : "alert-danger")">
+        @message
+    </div>
+}
+
+<div class="register-container">
+<h2>Регистрация като Майстор</h2>
+
+
+<form method="post">
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <div class="form-group">
+        <label for="RFirstName">Име</label>
+        <input type="text" class="form-control" id="RFirstName" name="Repairguy.RFirstName" required placeholder="Име" />
+    </div>
+    <div class="form-group">
+        <label for="RLastName">Фамилия</label>
+        <input type="text" class="form-control" id="RLastName" name="Repairguy.RLastName" required placeholder="Фамилия" />
+    </div>
+    <div class="form-group">
+        <label for="RTelephone">Телефон</label>
+        <input type="text" class="form-control" id="RTelephone" name="Repairguy.RTelephone" required placeholder="Телефон" />
+    </div>
+    <div class="form-group">
+        <label for="RTown">Град</label>
+        <select class="form-control" id="RTown" name="Repairguy.TownId" required>
+            @foreach (var town in Model.Towns)
+            {
+                <option value="@town.Id">@town.Name</option>
+            }
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="REmail">Имейл</label>
+        <input type="email" class="form-control" id="REmail" name="Repairguy.REmail" required placeholder="Имейл" />
+    </div>
+    <div class="form-group">
+        <label for="RPassword">Парола</label>
+        <div class="toggle-password-container">
+        <input type="password" class="form-control" id="RPassword" name="Repairguy.RPassword" required placeholder="Парола" />
+        <span class="toggle-password" onclick="toggleRPassword()">
+            <img src="@Url.Content("~/eye_open.png")" id="eyeIcon1" alt="Toggle Password Visibility">
+        </span>
+        </div>
+        <ul id="password-requirements" class="text-danger small"></ul>
+        <span asp-validation-for="Repairguy.Rpassword" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label for="ConfirmPassword">Потвърди парола</label>
+        <div class="toggle-password-container">
+        <input type="password" class="form-control" id="ConfirmPassword"
+               name="ConfirmPassword" placeholder="Потвърди парола">
+        <span class="toggle-password" onclick="toggleConfirmPassword()">
+            <img src="@Url.Content("~/eye_open.png")" id="eyeIcon2" alt="Toggle Password Visibility">
+        </span>
+        </div>
+            <ul id="confirm-password-message" class="text-danger small"></ul>
+        <span asp-validation-for="Repairguy.ConfirmPassword" class="text-danger"></span>
+    </div>
+    
+    <button type="submit" class="btn btn-primary">Регистрация</button>
+</form>
+</div>
+
+<script>
+    document.getElementById("RPassword").addEventListener("input", function () {
+        var password = this.value;
+        var requirements = document.getElementById("password-requirements");
+        var isValid = true;
+
+        requirements.innerHTML = "";
+
+        if (password.length < 5) {
+            requirements.innerHTML += "<li>Паролата трябва да включва минимално 5 символа.</li>";
+            isValid = false;
+        }
+        if (!/(?=.*[a-z])/.test(password)) {
+            requirements.innerHTML += "<li>Паролата трябва да съдържа поне една малка буква.</li>";
+            isValid = false;
+        }
+        if (!/(?=.*[A-Z])/.test(password)) {
+            requirements.innerHTML += "<li>Паролата трябва да съдържа поне една главна буква.</li>";
+            isValid = false;
+        }
+        if (!/(?=.*\d)/.test(password)) {
+            requirements.innerHTML += "<li>Паролата трябва да съдържа поне една цифра.</li>";
+            isValid = false;
+        }
+        if (!/(?=.*[!@@#\\$%\\^&\\*])/.test(password)) {
+            requirements.innerHTML += "<li>Паролата трябва да съдържа поне един специален символ (например !, ?, #, и т.н.).</li>";
+            isValid = false;
+        }
+
+        if (isValid) {
+            requirements.innerHTML += "<li class='valid-password'>Паролата отговаря на всички изисквания.</li>";
+        }
+    });
+
+
+
+    document.getElementById("ConfirmPassword").addEventListener("input", function () {
+        var confirmPassword = this.value;
+        var password = document.getElementById("RPassword").value;
+        var confirmPasswordMessage = document.getElementById("confirm-password-message");
+
+        confirmPasswordMessage.innerHTML = ""; // Clear previous messages
+
+        if (confirmPassword !== password) {
+            confirmPasswordMessage.innerHTML = "<li class='text-danger'>Паролите не съвпадат.</li>";
+        } else {
+            confirmPasswordMessage.innerHTML = "<li class='valid-password'>Паролите съвпадат.</li>";
+        }
+    });
+
+
+    function toggleRPassword() {
+        const passwordField = document.getElementById('RPassword');
+        const eyeIcon = document.getElementById('eyeIcon1');
+        const passwordFieldType = passwordField.getAttribute('type');
+
+        if (passwordFieldType === 'password') {
+            passwordField.setAttribute('type', 'text');
+            eyeIcon.setAttribute('src', '@Url.Content("~/eye_hidden.png")');
+        } else {
+            passwordField.setAttribute('type', 'password');
+            eyeIcon.setAttribute('src', '@Url.Content("~/eye_open.png")');
+        }
+    }
+	
+	
+    function toggleConfirmPassword() {
+        const passwordField = document.getElementById('ConfirmPassword');
+        const eyeIcon = document.getElementById('eyeIcon2');
+        const passwordFieldType = passwordField.getAttribute('type');
+
+        if (passwordFieldType === 'password') {
+            passwordField.setAttribute('type', 'text');
+            eyeIcon.setAttribute('src', '@Url.Content("~/eye_hidden.png")');
+        } else {
+            passwordField.setAttribute('type', 'password');
+            eyeIcon.setAttribute('src', '@Url.Content("~/eye_open.png")');
+        }
+    }
+</script>

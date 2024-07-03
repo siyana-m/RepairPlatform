@@ -1,0 +1,238 @@
+﻿@using RepairPlatform.Services;
+@using System.Security.Claims;
+@inject ClientsService _clientsService
+@inject RepairguysService _repairguyService;
+
+
+@{
+    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+    var profileImageUrl = Url.Content("~/profile-circle-icon-512x512-zxne30hp.png");
+    var defaultProfileImageUrl = Url.Content("~/profile-circle-icon-512x512-zxne30hp.png");
+
+    var userRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+    var homeUrl = Url.Page("/Index");
+    var historyUrl = Url.Page("/Error");
+    var profileSettingsUrl = Url.Page("/Error");
+    var userName = "";
+    var userWithRoleId = 0;
+    var isAdminLoginPage = userRole == "admin";
+
+    if (userRole == "client")
+    {
+        RepairPlatform.Services.DTO.Clients.ClientDto clientDto = await _clientsService.GetByUserId(userId!);
+        profileImageUrl = Convert.ToBase64String(clientDto.Cphoto);
+        homeUrl = "/Views/Client/ClientView";
+        historyUrl = Url.Page("/Views/Client/ClientHistoryReservations");
+        userName = clientDto.CfirstName + " " + clientDto.ClastName;
+        profileSettingsUrl = Url.Page("/Views/Client/ClientProfileSettings");
+        userWithRoleId = clientDto.ClientId;
+    }
+
+    if (userRole == "repairguy")
+    {
+        RepairPlatform.Services.DTO.Repairguys.RepairguyDto repairguyDto = await _repairguyService.GetByUserId(userId!);
+        if (repairguyDto != null) {
+            profileImageUrl = Convert.ToBase64String(repairguyDto!.Rphoto);
+        }
+        homeUrl = "/Views/Repairguy/RepairguyView";
+        historyUrl = Url.Page("/Views/Repairguy/RepairguyHistoryReservations");
+        userName = repairguyDto.RfirstName + " " + repairguyDto.RlastName;
+        profileSettingsUrl = Url.Page("/Views/Repairguy/RepairguyProfileSettings");
+        userWithRoleId = repairguyDto.RepairguyId;
+    }
+
+    if (userRole == "admin")
+    {
+        homeUrl = "/Views/Admin/AdminView";
+        profileSettingsUrl = Url.Page("/Views/Admin/AdminProfileSettings");
+        userName = User.FindFirst(ClaimTypes.Email)?.Value;
+        //userWithRoleId = repairguyDto.RepairguyId; -> ????
+
+    }
+
+    if (profileImageUrl.Equals("", StringComparison.OrdinalIgnoreCase)) profileImageUrl = defaultProfileImageUrl;
+    
+
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="~/logoicon.png" type="image/x-icon" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/RepairPlatform.Web.styles.css" asp-append-version="true" />
+
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.css' rel='stylesheet' />
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js'></script>
+
+    <style>
+        .navbar {
+            background-color: transparent; /* Remove background color from navbar */
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            background-color: transparent;
+        }
+
+            .navbar-brand img:first-child {
+                height: 60px;
+                margin-right: 10px;
+            }
+
+            .navbar-brand img:last-child {
+                height: 40px;
+            }
+
+        .custom-dropdown-toggle::after {
+            display: none;
+        }
+
+        .btn-register {
+            background-color: rgb(255, 145, 77); 
+            border-color: rgb(255, 145, 77); 
+            color: white; 
+        }
+
+            .btn-register:hover {
+                background-color: rgb(255, 128, 51); 
+                border-color: rgb(255, 128, 51); 
+                color: white; 
+            }
+
+        .btn-login {
+            background-color: rgb(191, 80, 80); 
+            border-color: rgb(191, 80, 80); 
+            color: white; 
+        }
+
+            .btn-login:hover {
+                background-color: rgb(170, 70, 70); 
+                border-color: rgb(170, 70, 70); 
+                color: white; 
+            }
+    </style>
+    
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    @RenderSection("Styles", required: false)
+
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container">
+                <a class="navbar-brand" asp-area="" asp-page="/Index" style="display: flex; align-items: center;">
+                    <img src="~/logoicon.png" alt="Лого" style="height: 60px; margin-right: 10px;" />
+                    <img src="~/logoname.png" alt="Намери(х) си майстора!" style="height: 40px;" />
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+
+                    @if (userRole == "admin")
+                    {
+                        <ul class="navbar-nav flex-grow-1">
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-page="/Views/Admin/AdminUsers">Потребители</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-page="/Views/Admin/AdminCatalogs">Каталози</a>
+                            </li>
+                        </ul>
+
+                        <ul class="navbar-nav">
+                            @if (User.Identity != null && User.Identity.IsAuthenticated && !ViewData.ContainsKey("IsLogoutPage"))
+                            {
+                                <li class="nav-item">
+                                    <span class="nav-link text-dark">@userName</span>
+                                </li>
+                                <li class="nav-item">
+                                    <form id="logoutForm" method="post" asp-page="/Login_Logout/Logout">
+                                        <button type="submit" class="btn btn-link nav-link text-dark">Изход</button>
+                                    </form>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <ul class="navbar-nav flex-grow-1">
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-page="@homeUrl" asp-route-id="@userWithRoleId">Начало</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-page="/Privacy">Поверителност</a>
+                            </li>
+                        </ul>
+
+                        <ul class="navbar-nav">
+                            @if (User.Identity != null && User.Identity.IsAuthenticated && !ViewData.ContainsKey("IsLogoutPage"))
+                            {
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle custom-dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        @if (profileImageUrl.Equals(defaultProfileImageUrl, StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            <img src="@defaultProfileImageUrl" alt="Profile Image" style="width:30px;height:30px;border-radius:50%;" />
+                                        }
+                                        else
+                                        {
+                                            <img src="data:image;base64,@profileImageUrl" alt="Profile Image" style="width:30px;height:30px;border-radius:50%;" />
+                                        }
+                                        @userName
+                                    </a>
+                                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                                        <a class="dropdown-item" href="@historyUrl">Резервации</a>
+                                        <a class="dropdown-item" href="@profileSettingsUrl">Настройки</a>
+                                    </div>
+                                </li>
+                                <li class="nav-item">
+                                    <form id="logoutForm" method="post" asp-page="/Login_Logout/Logout">
+                                        <button type="submit" class="btn btn-link nav-link text-dark">Изход</button>
+                                    </form>
+                                </li>
+                            }
+                            else if (!ViewData.ContainsKey("IsLogoutPage") && !isAdminLoginPage)
+                            {
+                                <li class="nav-item">
+                                    <a class="btn btn-register" asp-area="" asp-page="/Register/Register">Регистрация</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="btn btn-login" asp-area="" asp-page="/Login_Logout/Login">Вход</a>
+                                </li>
+                            }
+                        </ul>
+                    }
+
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2024. Намери(х) си майстора! - 20118046
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

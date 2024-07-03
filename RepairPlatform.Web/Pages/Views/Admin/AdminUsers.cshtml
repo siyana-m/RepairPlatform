@@ -1,0 +1,135 @@
+﻿@page
+@model RepairPlatform.Web.Pages.Views.Admin.AdminUsersModel
+@{
+    ViewData["Title"] = "Потребители | Админ";
+}
+
+<h1>Потребители</h1>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Майстори</h2>
+    <button class="btn btn-primary" onclick="location.href='@Url.Page("AdminUsers", "ExportRepairguyPerformanceReport", new { status = Request.Query["status"], sortOption = Request.Query["sortOption"] })'">Експорт на Отчет за Изпълнение</button>
+</div>
+
+<div class="mb-3">
+    <form method="get" class="form-inline">
+        <label for="status" class="mr-2">Филтър по статус:</label>
+        <select id="status" name="status" class="form-control mr-2">
+            <option value="">Всички</option>
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+        </select>
+
+        <label for="sortOption" class="mr-2">Сортиране по:</label>
+        <select id="sortOption" name="sortOption" class="form-control mr-2">
+            <option value="">Избери</option>
+            <option value="ratingAsc">Оценка (възходящ ред)</option>
+            <option value="ratingDesc">Оценка (низходящ ред)</option>
+            <option value="reservationsAsc">Резервации (възходящ ред)</option>
+            <option value="reservationsDesc">Резервации (низходящ ред)</option>
+        </select>
+
+        <button type="submit" class="btn btn-primary">Филтрирай и Сортирай</button>
+    </form>
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Име</th>
+            <th>Имейл</th>
+            <th>Средна Оценка</th>
+            <th>Брой Резервации</th>
+            <th>Брой Завършени Резервации</th>
+            <th>Статус</th>
+            <th>Действия</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var repairguy in Model.AdminUsers.Repairguys)
+        {
+            <tr>
+                <td>@repairguy.RfirstName @repairguy.RlastName</td>
+                <td>@repairguy.Remail</td>
+                <td>@repairguy.AverageRating</td>
+                <td>@repairguy.TotalReservations</td>
+                <td>@repairguy.CompletedReservations</td>
+                <td>
+                    @if (Model.AdminUsers.EditRepairguyId == repairguy.RepairguyId)
+                    {
+                        <form method="post" asp-page-handler="ChangeRepairguyStatus" asp-route-id="@repairguy.RepairguyId">
+                            <select name="status" asp-items="Model.GetStatusOptions(repairguy.Rstatus)">
+                            </select>
+                            <button type="submit" class="btn btn-primary">Save</button>
+                            <button type="button" class="btn btn-secondary" onclick="location.href='@Url.Page("/Views/Admin/AdminUsers")'">Отказ</button>
+                        </form>
+                    }
+                    else
+                    {
+                        @repairguy.Rstatus
+                    }
+                </td>
+                <td>
+                    @if (Model.AdminUsers.EditRepairguyId == repairguy.RepairguyId)
+                    {
+                        @* <button type="button" class="btn btn-link" onclick="location.href='@Url.Page("/Views/Admin/AdminUsers")'">Отказ</button> *@
+                    }
+                    else
+                    {
+                        <form method="post" asp-page-handler="EditRepairguy" asp-route-id="@repairguy.RepairguyId" style="display:inline;">
+                            <button type="submit" class="btn btn-link">Промяна</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<h2>Клиент</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Име</th>
+            <th>Имейл</th>
+            <th>Статус</th>
+            <th>Действия</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var client in Model.AdminUsers.Clients)
+        {
+            <tr>
+                <td>@client.CfirstName @client.ClastName</td>
+                <td>@client.Cemail</td>
+                <td>
+                    @if (Model.AdminUsers.EditClientId == client.ClientId)
+                    {
+                        <form method="post" asp-page-handler="ChangeClientStatus" asp-route-id="@client.ClientId">
+                            <select name="status" asp-items="Model.GetStatusOptions(client.Cstatus)">
+                            </select>
+                            <button type="submit" class="btn btn-primary">Съхрани</button>
+                            <button type="button" class="btn btn-secondary" onclick="location.href='@Url.Page("/Views/Admin/AdminUsers")'">Отказ</button>
+                        </form>
+                    }
+                    else
+                    {
+                        @client.Cstatus
+                    }
+                </td>
+                <td>
+                    @if (Model.AdminUsers.EditClientId == client.ClientId)
+                    {
+                        @* <button type="button" class="btn btn-link" onclick="location.href='@Url.Page("/Views/Admin/AdminUsers")'">Отказ</button> *@
+                    }
+                    else
+                    {
+                        <form method="post" asp-page-handler="EditClient" asp-route-id="@client.ClientId" style="display:inline;">
+                            <button type="submit" class="btn btn-link">Промяна</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

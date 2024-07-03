@@ -1,0 +1,91 @@
+﻿@page
+@model RepairPlatform.Web.Pages.Login_Logout.AdminLoginModel
+@{
+    ViewData["Title"] = "Вход | Админ";
+}
+
+<style>
+    .login-container {
+        max-width: 300px;
+        margin: 0 auto;
+        padding-top: 50px;
+    }
+
+    .form-group {
+        position: relative;
+    }
+
+        .form-group label {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .form-group .form-control {
+            flex: 2;
+        }
+
+
+    .toggle-password {
+        position: absolute;
+        top: 67%;
+        right: 15px;
+        transform: translateY(-50%);
+        cursor: pointer;
+    }
+
+        .toggle-password img {
+            width: 20px;
+        }
+
+    .alert {
+        color: red;
+        margin-top: 10px;
+    }
+
+
+</style>
+
+
+<div class="login-container">
+    <h2>Вход - Администратор</h2>
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger">@Model.ErrorMessage</div>
+    }
+
+    <form method="post">
+        <input type="hidden" name="ReturnUrl" value="@Model.ReturnUrl" />
+        <div class="form-group">
+            <label for="Email">Имейл</label>
+            <input type="email" class="form-control" id="Email" name="Email" required placeholder="Имейл" />
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label for="Password">Парола</label>
+            <input type="password" class="form-control" id="Password" name="Password" required placeholder="Парола" />
+            <span class="toggle-password" onclick="togglePassword()">
+                <img src="@Url.Content("~/eye_open.png")" id="eyeIcon" alt="Toggle Password Visibility">
+            </span>
+            <span asp-validation-for="Password" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Вход</button>
+    </form>
+    <div/>
+
+        <script>
+            function togglePassword() {
+                const passwordField = document.getElementById('Password');
+                const eyeIcon = document.getElementById('eyeIcon');
+                const passwordFieldType = passwordField.getAttribute('type');
+
+                if (passwordFieldType === 'password') {
+                    passwordField.setAttribute('type', 'text');
+                    eyeIcon.setAttribute('src', '@Url.Content("~/eye_hidden.png")');
+                } else {
+                    passwordField.setAttribute('type', 'password');
+                    eyeIcon.setAttribute('src', '@Url.Content("~/eye_open.png")');
+                }
+            }
+        </script>

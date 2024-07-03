@@ -1,0 +1,407 @@
+﻿@page "{id:int}"
+@model RepairPlatform.Web.Pages.Views.Client.RepairguyProfileModel
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Policy = "RequireClientRole")]
+
+@{
+    ViewData["Title"] = Model.Repairguy?.RfirstName + " " + Model.Repairguy?.RlastName;
+
+    var defaultProfileImageUrl = Url.Content("~/profile-circle-icon-512x512-zxne30hp.png");
+
+    string RenderStars(double rating)
+    {
+        var fullStars = (int)Math.Floor(rating);
+        var partialStarWidth = (rating - fullStars) * 100;
+        var emptyStars = 5 - fullStars - (partialStarWidth > 0 ? 1 : 0);
+
+        var starsHtml = new System.Text.StringBuilder();
+
+        for (var i = 0; i < fullStars; i++)
+        {
+            starsHtml.Append("<span class='star filled'>★</span>");
+        }
+
+        if (partialStarWidth > 0)
+        {
+            starsHtml.Append($"<span class='star partial' style='--partial-width: {partialStarWidth}%;'>★</span>");
+        }
+
+        for (var i = 0; i < emptyStars; i++)
+        {
+            starsHtml.Append("<span class='star'>★</span>");
+        }
+
+        return starsHtml.ToString();
+    }
+}
+
+<style>
+    
+    .btn-custom {
+        background-color: rgb(214, 92, 92);
+        color: black; 
+        border: none; 
+        padding: 10px 20px; 
+        font-size: 1rem; 
+        border-radius: 5px; 
+        cursor: pointer; 
+    }
+
+    .review-container {
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 15px;
+        background-color: #f9f9f9;
+    }
+
+    .review-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .review-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-color: #ccc;
+        margin-right: 10px;
+    }
+
+    .review-details {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .review-name {
+        font-weight: bold;
+    }
+
+    .review-meta {
+        font-size: 0.9em;
+        color: #888;
+    }
+
+    .review-comment {
+        font-size: 1.1em;
+        margin-top: 10px;
+    }   
+
+    .star-rating {
+        direction: rtl;
+        display: inline-block;
+        font-size: 1.5rem;
+        padding: 10px;
+    }
+
+        .star-rating input[type="radio"] {
+            display: none;
+        }
+
+        .star-rating label {
+            color: #ddd;
+            cursor: pointer;
+            font-size: 2rem;
+        }
+
+        .star-rating input[type="radio"]:checked ~ label,
+        .star-rating input[type="radio"]:checked ~ label ~ label {
+            color: #f5b301;
+        }
+
+        .star-rating label:hover,
+        .star-rating label:hover ~ label {
+            color: #f5b301;
+        }
+
+
+        .star-rating label.filled {
+            color: #f5b301;
+            cursor: default; 
+            pointer-events: none; 
+        }
+
+        .star-rating label.not-filled {
+            cursor: default; 
+            pointer-events: none;
+        }
+
+    .disabled-container {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    .message {
+        color: red;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .average-rating {
+        display: flex;
+        align-items: center;
+        font-size: 1.2em;
+    }
+
+        .average-rating .star-rating {
+            display: flex;
+            direction: ltr;
+            font-size: 1.5em;
+            margin-left: 10px;
+        }
+
+        .average-rating .star {
+            color: #ddd;
+            position: relative;
+            display: inline-block;
+
+        }
+
+            .average-rating .star:before {
+                content: '★';
+                position: absolute;
+                top: 0;
+                left: 0;
+                color: #f5b301;
+                overflow: hidden;
+                width: 0%;
+            }
+
+            .average-rating .star.filled:before {
+                color: #f5b301;
+                width: 100%;
+            }
+
+            .average-rating .star.partial:before {
+                width: var(--partial-width, 0%);
+            }
+
+    .profile-picture {
+        width: 200px; 
+        height: 200px; 
+        border-radius: 50%; 
+    }
+
+</style>
+
+
+<div class="row">
+    <div class="col-md-3 repairguy-photo-container">
+        @if (Model.Repairguy?.Rphoto != null && Model.Repairguy.Rphoto.Length > 0)
+        {
+            <img src="@($"data:image/png;base64,{Convert.ToBase64String(Model.Repairguy.Rphoto)}")" class="profile-picture" />
+        }
+        else
+        {
+            <img src="@defaultProfileImageUrl" alt="Default Profile Image" class="profile-picture" />
+        }
+    </div>
+    <div class="col-md-9">
+        <h2>@Model.Repairguy?.RfirstName @Model.Repairguy?.RlastName</h2>
+        <p>@Model.Repairguy?.Rdescription</p>
+
+        <div class="average-rating">
+            <span>Average Rating: </span>
+            <span class="star-rating">
+                @{
+                    var fullStars = (int)Model.AverageRating;
+                    var partialStarWidth = (Model.AverageRating - fullStars) * 100;
+                }
+                @for (int i = 1; i <= 5; i++)
+                {
+                    if (i <= fullStars)
+                    {
+                        <span class="star filled">★</span>
+                    }
+                    else if (i == fullStars + 1 && partialStarWidth > 0)
+                    {
+                        <span class="star partial" style="--partial-width: @partialStarWidth%;">★</span>
+                    }
+                    else
+                    {
+                        <span class="star">★</span>
+                    }
+                }
+            </span>
+            <span>@Model.AverageRating.ToString("0.0")</span>
+        </div>
+
+
+        <form method="post" asp-page-handler="Reservation" asp-route-repairguyId="@Model.Repairguy?.RepairguyId">
+                <input type="hidden" name="repairguyId" value="@Model.Repairguy?.RepairguyId" />
+                <button class="btn btn-custom">Резервирай</button>
+            </form>
+    </div>
+</div>
+
+<table class="table">
+    <tbody>
+        <tr>
+            <td>Groups</td>
+            <td>
+                <ul>
+                    @if (Model.Repairguy?.Groups != null)
+                    {
+                        foreach (var group in Model.Repairguy.Groups)
+                        {
+                            <li>@group</li>
+                        }
+                    }
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td>Repairs</td>
+            <td>
+                <ul>
+                    @if (Model.Repairguy?.Repairs != null)
+                    {
+                        foreach (var repair in Model.Repairguy.Repairs)
+                        {
+                            <li>@repair.RepName</li>
+                        }
+                    }
+                </ul>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+
+@if (!string.IsNullOrEmpty(Model.Message))
+{
+    <div class="alert @(Model.MessageType == "error" ? "alert-danger" : "alert-success")">
+        @Model.Message
+    </div>
+}
+
+
+<h3>Мнения</h3>
+<div>
+    @if (Model.Reviews != null && Model.Reviews.Any())
+    {
+        @foreach (var review in Model.Reviews)
+        {
+            <div class="review-container">
+                <div class="review-header">
+                    <div class="review-avatar">
+                        @if (review.Client.Cphoto != null && review.Client.Cphoto.Length > 0)
+                        {
+                            <img src="@($"data:image/png;base64,{Convert.ToBase64String(review.Client.Cphoto)}")" alt="Profile Image" style="width:50px;height:50px;border-radius:50%;" />
+                        }
+                        else
+                        {
+                            <img src="~/profile-circle-icon-512x512-zxne30hp.png" alt="Default Profile Image" style="width:50px;height:50px;border-radius:50%;" />
+                        }
+                    </div>
+                    <div class="review-details">
+                        <div class="review-name">@($"{review.Client.CfirstName} {review.Client.ClastName}")</div>
+                        <div class="review-meta">@review.RevDateTime.ToString("dd.MM.yyyy") | @review.Group.CatName</div>
+                    </div>
+                </div>
+                <div class="star-rating">
+                    @for (int i = 5; i >= 1; i--)
+                    {
+                        <label class="@(i <= review.Rating ? "filled" : "not-filled")">★</label>
+                    }
+                </div>
+                <div class="review-comment">“@review.RevComment”</div>
+            </div>
+        }
+    }
+    else
+    {
+        <p>Няма налични ревюта.</p>
+    }
+</div>
+
+@if (!Model.CanLeaveReview)
+{
+    <div class="message">Все още нямате налични резервации, за които да оставите отзив.</div>
+}
+
+<div class="@(Model.CanLeaveReview ? "" : "disabled-container")">
+    <h3>Остави мнение</h3>
+    <form method="post" asp-page-handler="Review" asp-route-repairguyId="@Model.Repairguy?.RepairguyId">
+        <div class="form-group">
+            <label for="reservation">Резервация:</label>
+            <select id="reservation" name="SelectedReservationId" class="form-control" @(Model.ClientReservations.Any() ? "" : "disabled")>
+                <option value="">Избери Резервация</option>
+                @foreach (var reservation in Model.ClientReservations)
+                {
+                    <option value="@reservation.ReservationId" data-group="@reservation.Group.CatName" data-location="@reservation.ResLocation">@reservation.ResName</option>
+                }
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="group">Група:</label>
+            <input type="text" id="group" name="NewReview.GroupId" class="form-control" readonly />
+        </div>
+        <div class="form-group">
+            <label for="location">Локация:</label>
+            <input type="text" id="location" name="NewReview.RevLocation" class="form-control" readonly />
+        </div>
+        <div class="form-group">
+            <label for="rating">Оценка:</label>
+            <div class="star-rating">
+                <input type="radio" id="star5" name="NewReview.Rating" value="5" /><label for="star5" title="5 stars">★</label>
+                <input type="radio" id="star4" name="NewReview.Rating" value="4" /><label for="star4" title="4 stars">★</label>
+                <input type="radio" id="star3" name="NewReview.Rating" value="3" /><label for="star3" title="3 stars">★</label>
+                <input type="radio" id="star2" name="NewReview.Rating" value="2" /><label for="star2" title="2 stars">★</label>
+                <input type="radio" id="star1" name="NewReview.Rating" value="1" /><label for="star1" title="1 star">★</label>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="comment">Коментар:</label>
+            <textarea id="comment" name="NewReview.RevComment" class="form-control" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-custom" @(Model.CanLeaveReview ? "" : "disabled")>Публикувай мнение</button>
+    </form>
+</div>
+
+<script>
+    document.getElementById('reservation').addEventListener('change', function () {
+        var selectedOption = this.options[this.selectedIndex];
+        var group = selectedOption.getAttribute('data-group');
+        var location = selectedOption.getAttribute('data-location');
+
+        document.getElementById('group').value = group;
+        document.getElementById('location').value = location;
+    });
+
+    var modal = document.getElementById("noReservationsModal");
+    var span = document.getElementsByClassName("close")[0];
+
+    if (!@(Model.ClientReservations.Any().ToString().ToLower())) {
+        modal.style.display = "block";
+    }
+
+    span.onclick = function () {
+        modal.style.display = "none";
+    }
+
+    window.onclick = function (event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+
+    var modal = document.getElementById("noReservationsModal");
+    var span = document.getElementsByClassName("close")[0];
+
+    if (!@(Model.ClientReservations.Any().ToString().ToLower())) {
+        modal.style.display = "block";
+    }
+
+    span.onclick = function () {
+        modal.style.display = "none";
+    }
+
+    window.onclick = function (event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+
+</script>

@@ -1,0 +1,88 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Начало ";
+}
+
+<div class="background-container">
+    <img src="~/handymanreal.jpg" alt="Background Image" class="background-image" />
+</div>
+<div class="content text-center">
+    <h1 class="display-4">Добре дошли!</h1>
+    <p>Намери си майстора тук и сега!</p>
+    <a href="/Views/Public/RepairguyList" class="btn btn-primary">Виж Майстори</a>
+</div>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+    }
+
+    .background-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100vh;
+        overflow: hidden;
+        z-index: -1; 
+    }
+
+    .background-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover; 
+        opacity: 0; 
+        transform: translateY(50px);
+        transition: transform 1s ease-in-out, opacity 1s ease-in-out;
+    }
+
+        .background-image.visible {
+            transform: translateY(0);
+            opacity: 0.5;
+            
+        }
+
+    .content {
+        position: relative;
+        z-index: 2;
+        color: black;
+        margin-top: 10vh;
+    }
+
+        .content h1 {
+            font-size: 4rem; 
+        }
+
+        .content p {
+            font-size: 1.5rem; 
+        }
+
+    .btn-custom {
+        background-color: rgb(55, 182, 255); 
+        border-color: rgb(45, 145, 204); 
+        color: white; 
+    }
+
+        .btn-custom:hover {
+            background-color: rgb(45, 145, 204); 
+            border-color: rgb(45, 145, 204); 
+        }
+
+    .footer {
+        position: relative;
+        z-index: 2;
+        background-color: white;
+    }
+
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        setTimeout(function () {
+            document.querySelector(".background-image").classList.add("visible");
+        }, 500);
+    });
+</script>

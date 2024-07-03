@@ -1,0 +1,269 @@
+﻿@page "{id:int}"
+@model RepairPlatform.Web.Pages.Views.Repairguy.RepairguyViewModel
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Policy = "RequireRepairGuyRole")]
+@{
+    var repairguyName = $"{Model.Repairguy?.RfirstName} {Model.Repairguy?.RlastName}";
+    ViewData["Title"] = $"Майстор {repairguyName}";
+    var defaultProfileImageUrl = Url.Content("~/profile-circle-icon-512x512-zxne30hp.png");
+    string GetStatusText(string status)
+    {
+        return status.ToLower() == "active" ? "Активен" : "Неактивен";
+    }
+
+    string RenderStars(double rating)
+    {
+        var fullStars = (int)Math.Floor(rating);
+        var partialStarWidth = (rating - fullStars) * 100;
+        var emptyStars = 5 - fullStars - (partialStarWidth > 0 ? 1 : 0);
+
+        var starsHtml = new System.Text.StringBuilder();
+
+        for (var i = 0; i < fullStars; i++)
+        {
+            starsHtml.Append("<span class='star filled'>★</span>");
+        }
+
+        if (partialStarWidth > 0)
+        {
+            starsHtml.Append($"<span class='star partial' style='--partial-width: {partialStarWidth}%;'>★</span>");
+        }
+
+        for (var i = 0; i < emptyStars; i++)
+        {
+            starsHtml.Append("<span class='star'>★</span>");
+        }
+
+        return starsHtml.ToString();
+    }
+}
+
+
+@if (Model.Repairguy != null)
+{
+    <div class="profile-container">
+        <div class="left-column">
+            <div class="repairguy-info">
+                <div class="repairguy-profile">
+                    @if ((Convert.ToBase64String(Model.Repairguy.Rphoto!) != null) && (Convert.ToBase64String(Model.Repairguy.Rphoto!).Length! > 0))
+                    {
+                        <img src="data:image;base64,@Convert.ToBase64String(Model.Repairguy.Rphoto!)" alt="Profile Picture" class="repairguy-profile-picture" />
+                    }
+                    else
+                    {
+                        <img src="@defaultProfileImageUrl" alt="Profile Picture" class="repairguy-profile-picture" />
+                    }
+
+                    <div class="repairguy-details">
+                        <h2>@Model.Repairguy.RfirstName @Model.Repairguy.RlastName</h2>
+                        <p>
+                            Статус:
+                            <span class="status-dot @(Model.Repairguy.Rstatus!.ToLower() == "active" ? "status-active" : "status-inactive")"></span>
+                            <span class="status-label">@GetStatusText(Model.Repairguy.Rstatus)</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="average-rating">
+                <span>Средна оценка: </span>
+                <span class="star-rating">
+                    @{
+                        var fullStars = (int)Model.AverageRating;
+                        var partialStarWidth = (Model.AverageRating - fullStars) * 100;
+                    }
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        if (i <= fullStars)
+                        {
+                            <span class="star filled">★</span>
+                        }
+                        else if (i == fullStars + 1 && partialStarWidth > 0)
+                        {
+                            <span class="star partial" style="--partial-width: @partialStarWidth%;">★</span>
+                        }
+                        else
+                        {
+                            <span class="star">★</span>
+                        }
+                    }
+                </span>
+                <span>@Model.AverageRating.ToString("0.0")</span>
+            </div>
+
+            <h3>Reservations</h3>
+            <div id='calendar'></div>
+        </div>
+
+        <div class="right-column">
+            <h3>Ремонти</h3>
+            @if (Model.GroupedRepairs != null && Model.GroupedRepairs.Any())
+            {
+                foreach (var group in Model.GroupedRepairs)
+                {
+                    <h4>@group.Key</h4>
+                    <ul>
+                        @foreach (var repair in group.Value)
+                        {
+                            <li>@repair</li>
+                        }
+                    </ul>
+                }
+            }
+        </div>
+    </div>
+}
+
+
+
+@* <h3>Repairs and Groups</h3>
+@if (Model.GroupedRepairs != null && Model.GroupedRepairs.Any())
+{
+    foreach (var group in Model.GroupedRepairs)
+    {
+        <h4>@group.Key</h4>
+        <ul>
+            @foreach (var repair in group.Value)
+            {
+                <li>@repair</li>
+            }
+        </ul>
+    }
+} *@
+
+<div id='calendar'></div>
+
+@section Scripts {
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js'></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var calendarEl = document.getElementById('calendar');
+            var events = @Html.Raw(Json.Serialize(Model.Reservations!.Select(reservation => new
+            {
+                title = reservation.ResName,
+                start = reservation.ResDateTime,
+                description = reservation.ResLocation
+            })));
+
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                events: events,
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                }
+            });
+            calendar.render();
+        });
+    </script>
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.css' rel='stylesheet' />
+}
+
+<style>
+
+    .profile-container {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        margin-bottom: 20px;
+    }
+
+    .left-column, .right-column {
+        flex: 1;
+        max-width: 45%;
+        margin: 0 20px;
+    }
+
+
+    .repairguy-info {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .repairguy-profile {
+        display: flex;
+        align-items: center;
+    }
+
+    .repairguy-profile-picture {
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        margin-right: 15px;
+    }
+
+    .repairguy-details {
+        display: flex;
+        flex-direction: column;
+        margin-left: 15px;
+    }
+
+
+    .status-dot {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-right: 5px;
+    }
+
+    .status-active {
+        background-color: green;
+    }
+
+    .status-inactive {
+        background-color: red;
+    }
+
+    .search-container {
+        margin-bottom: 20px;
+    }
+
+
+    #calendar {
+        width: 100%;
+        max-width: 900px;
+        height: 600px;
+        margin: 0 auto;
+    }
+
+    .average-rating {
+        display: flex;
+        align-items: center;
+        font-size: 1.2em;
+    }
+
+        .average-rating .star-rating {
+            display: flex;
+            direction: ltr;
+            font-size: 1.5em;
+            margin-left: 10px;
+        }
+
+        .average-rating .star {
+            color: #ddd;
+            position: relative;
+            display: inline-block;
+        }
+
+            .average-rating .star:before {
+                content: '★';
+                position: absolute;
+                top: 0;
+                left: 0;
+                color: #f5b301;
+                overflow: hidden;
+                width: 0%;
+            }
+
+            .average-rating .star.filled:before {
+                color: #f5b301;
+                width: 100%;
+            }
+
+            .average-rating .star.partial:before {
+                width: var(--partial-width, 0%);
+            }
+</style>

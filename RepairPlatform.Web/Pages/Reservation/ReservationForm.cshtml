@@ -1,0 +1,47 @@
+﻿@page
+@model RepairPlatform.Web.Pages.Reservation.ReservationFormModel
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Policy = "RequireClientRole")]
+@{
+    ViewData["Title"] = "Резервация";
+}
+
+<h2>Резервация</h2>
+
+<form method="post">
+
+    <label for="repairguy">RepairguyID</label>
+    <input type="hidden" name="Reservation.RepairguyId" value="@Model.RepairGuyId" />
+
+    <label for="client">ClientID</label>
+    <input type="hidden" name="Reservation.ClientId" value="@Model.ClientId" />
+    
+    
+
+    <div class="form-group"> 
+        <label for="Name">Име на ремонта</label>    
+        <input type="text" name="Reservation.ResName" class="form-control" required />
+    </div>
+    <div class="form-group">
+        <label for="Group">Категория Ремонт</label>
+        <select name="Reservation.GroupId" class="form-control" required>
+            @foreach (var group in Model.Groups!)
+            {
+                <option value="@group.GroupId">@group.CatName</option>
+            }
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="DateTime">Дата и Час</label>
+        <input type="datetime-local" name="Reservation.ResDateTime" class="form-control" required />
+    </div>
+    <div class="form-group">
+        <label for="Location">Адрес</label>
+        <input type="text" name="Reservation.ResLocation" class="form-control" required />
+    </div>
+    <div class="form-group">
+        <label for="Comment">Коментар</label>
+        <textarea name="Reservation.ResComment" class="form-control"></textarea>
+    </div>
+    <button type="submit" name="action" value="continue" class="btn btn-primary">Продължи</button>
+</form>

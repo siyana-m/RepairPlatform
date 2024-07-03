@@ -1,0 +1,305 @@
+﻿@page
+@model RepairPlatform.Web.Pages.RepairguyProfilePublicModel
+@{
+    ViewData["Title"] = Model.Repairguy?.RfirstName + " " + Model.Repairguy?.RlastName;
+
+    var defaultProfileImageUrl = Url.Content("~/profile-circle-icon-512x512-zxne30hp.png");
+
+    string RenderStars(double rating)
+    {
+        var fullStars = (int)Math.Floor(rating);
+        var partialStarWidth = (rating - fullStars) * 100;
+        var emptyStars = 5 - fullStars - (partialStarWidth > 0 ? 1 : 0);
+
+        var starsHtml = new System.Text.StringBuilder();
+
+        for (var i = 0; i < fullStars; i++)
+        {
+            starsHtml.Append("<span class='star filled'>★</span>");
+        }
+
+        if (partialStarWidth > 0)
+        {
+            starsHtml.Append($"<span class='star partial' style='--partial-width: {partialStarWidth}%;'>★</span>");
+        }
+
+        for (var i = 0; i < emptyStars; i++)
+        {
+            starsHtml.Append("<span class='star'>★</span>");
+        }
+
+        return starsHtml.ToString();
+    }
+}
+
+<style>
+
+    .btn-custom {
+        background-color: rgb(214, 92, 92);
+        color: black;
+        border: none;
+        padding: 10px 20px;
+        font-size: 1rem;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .review-container {
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 15px;
+        background-color: #f9f9f9;
+    }
+
+    .review-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .review-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-color: #ccc;
+        margin-right: 10px;
+    }
+
+    .review-details {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .review-name {
+        font-weight: bold;
+    }
+
+    .review-meta {
+        font-size: 0.9em;
+        color: #888;
+    }
+
+    .review-comment {
+        font-size: 1.1em;
+        margin-top: 10px;
+    }
+
+    .star-rating {
+        direction: rtl;
+        display: inline-block;
+        font-size: 1.5rem;
+        padding: 10px;
+    }
+
+        .star-rating input[type="radio"] {
+            display: none;
+        }
+
+        .star-rating label {
+            color: #ddd;
+            cursor: pointer;
+            font-size: 2rem;
+        }
+
+        .star-rating input[type="radio"]:checked ~ label,
+        .star-rating input[type="radio"]:checked ~ label ~ label {
+            color: #f5b301;
+        }
+
+        .star-rating label:hover,
+        .star-rating label:hover ~ label {
+            color: #f5b301;
+        }
+
+
+        .star-rating label.filled {
+            color: #f5b301;
+            cursor: default;
+            pointer-events: none; 
+        }
+
+        .star-rating label.not-filled {
+            cursor: default;
+            pointer-events: none;
+        }
+
+    .disabled-container {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    .message {
+        color: red;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .average-rating {
+        display: flex;
+        align-items: center;
+        font-size: 1.2em;
+    }
+
+        .average-rating .star-rating {
+            display: flex;
+            direction: ltr;
+            font-size: 1.5em;
+            margin-left: 10px;
+        }
+
+        .average-rating .star {
+            color: #ddd;
+            position: relative;
+            display: inline-block;
+        }
+
+            .average-rating .star:before {
+                content: '★';
+                position: absolute;
+                top: 0;
+                left: 0;
+                color: #f5b301;
+                overflow: hidden;
+                width: 0%;
+            }
+
+            .average-rating .star.filled:before {
+                color: #f5b301;
+                width: 100%;
+            }
+
+            .average-rating .star.partial:before {
+                width: var(--partial-width, 0%);
+            }
+
+    .profile-picture {
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+    }
+</style>
+
+
+<div class="row">
+    <div class="col-md-3 repairguy-photo-container">
+        @if (Model.Repairguy?.Rphoto != null && Model.Repairguy.Rphoto.Length > 0)
+        {
+            <img src="@($"data:image/png;base64,{Convert.ToBase64String(Model.Repairguy.Rphoto)}")" class="profile-picture" />
+        }
+        else
+        {
+            <img src="@defaultProfileImageUrl" alt="Default Profile Image" class="profile-picture" />
+        }
+    </div>
+    <div class="col-md-9">
+        <h2>@Model.Repairguy?.RfirstName @Model.Repairguy?.RlastName</h2>
+        <p>@Model.Repairguy?.Rdescription</p>
+
+        <div class="average-rating">
+            <span>Average Rating: </span>
+            <span class="star-rating">
+                @{
+                    var fullStars = (int)Model.AverageRating;
+                    var partialStarWidth = (Model.AverageRating - fullStars) * 100;
+                }
+                @for (int i = 1; i <= 5; i++)
+                {
+                    if (i <= fullStars)
+                    {
+                        <span class="star filled">★</span>
+                    }
+                    else if (i == fullStars + 1 && partialStarWidth > 0)
+                    {
+                        <span class="star partial" style="--partial-width: @partialStarWidth%;">★</span>
+                    }
+                    else
+                    {
+                        <span class="star">★</span>
+                    }
+                }
+            </span>
+            <span>@Model.AverageRating.ToString("0.0")</span>
+        </div>
+
+        @if (User.Identity!.IsAuthenticated)
+        {
+            <form method="post" asp-page="/Reservation/ReservationForm">
+                <input type="hidden" name="repairguyId" value="@Model.Repairguy?.RepairguyId" />
+                <button class="btn btn-custom">Резервирай</button>
+            </form>
+        }
+        else
+        {
+            <p>Моля, <a href="@Url.Page("/Login_Logout/Login", new { returnUrl = HttpContext.Request.Path + HttpContext.Request.QueryString })">влезте в своя акаунт</a>, за да направите резервация.</p>
+        }
+    </div>
+</div>
+
+<table class="table">
+    <tbody>
+        <tr>
+            <td>Groups</td>
+            <td>
+                <ul>
+                    @foreach (var group in Model.Repairguy!.Groups)
+                    {
+                        <li>@group</li>
+                    }
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td>Repairs</td>
+            <td>
+                <ul>
+                    @foreach (var repair in Model.Repairguy.Repairs!)
+                    {
+                        <li>@repair.RepName</li>
+                    }
+                </ul>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<h3>Мнения</h3>
+<div>
+    @if (Model.Reviews != null && Model.Reviews.Any())
+    {
+        <ul>
+            @foreach (var review in Model.Reviews)
+            {
+                <div class="review-container">
+                    <div class="review-header">
+                        <div class="review-avatar">
+                            @if (review.Client.Cphoto != null && review.Client.Cphoto.Length > 0)
+                            {
+                                <img src="@($"data:image/png;base64,{Convert.ToBase64String(review.Client.Cphoto)}")" alt="Profile Image" style="width:50px;height:50px;border-radius:50%;" />
+                            }
+                            else
+                            {
+                                <img src="~/profile-circle-icon-512x512-zxne30hp.png" alt="Default Profile Image" style="width:50px;height:50px;border-radius:50%;" />
+                            }
+                        </div>
+                        <div class="review-details">
+                            <div class="review-name">@($"{review.Client.CfirstName} {review.Client.ClastName}")</div>
+                            <div class="review-meta">@review.RevDateTime.ToString("dd.MM.yyyy") | @review.Group.CatName</div>
+                        </div>
+                    </div>
+                    <div class="star-rating">
+                        @for (int i = 5; i >= 1; i--)
+                        {
+                            <label class="@(i <= review.Rating ? "filled" : "not-filled")">★</label>
+                        }
+                    </div>
+                    <div class="review-comment">“@review.RevComment”</div>
+                </div>
+            }
+        </ul>
+    }
+    else
+    {
+        <p>Няма налични мнения.</p>
+    }
+</div>
